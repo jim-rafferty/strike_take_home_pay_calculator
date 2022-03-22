@@ -5,6 +5,7 @@ import dash_bootstrap_components as dbc
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.GRID])
 server = app.server
+app.title = "Strike Take Home Pay Calculator"
 
 app.layout = html.Div([
 
@@ -206,7 +207,7 @@ app.layout = html.Div([
         , html.A("here.", href="https://github.com/jim-rafferty/strike_take_home_pay_calculator"),
         """
         If you have any improvements to this tool, please send me a pull request on github and I will
-        be happy to incorporate them. Please send questions and comments to""",
+        be happy to incorporate them. Please send questions and comments to """,
         html.A("j.m.rafferty@swansea.ac.uk", href="mailto:j.m.rafferty@swansea.ac.uk"),
         ],
         style={'fontSize': 12}
