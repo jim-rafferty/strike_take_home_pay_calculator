@@ -248,7 +248,7 @@ def forgone_mnthly_slry(sal_in, frac_in, n_strike_days):
         frac = 1/365
     elif frac_in == "1/260":
         frac = 1/260
-    return "£{:.2f}".format((- frac * float(n_strike_days) * float(sal_in)))    
+    return "£{:.2f}".format((frac * float(n_strike_days) * float(sal_in)))    
 
 
 @app.callback(
@@ -331,7 +331,7 @@ def mnthly_ni(sal_in):
 
     sal = float(sal_in)/12
     
-    ni = 0.12 * (sal - 797) - 0.1 * max([0, sal - 4190.33])
+    ni = max([0, 0.12 * (sal - 797) - 0.1 * max([0, sal - 4190.33])])
 
     return "£{:.2f}".format(ni)
 
@@ -352,7 +352,7 @@ def mnthly_ni_deduct(sal_in, frac_in, n_days_in):
     n_days = float(n_days_in)
     sal = float(sal_in)/12 - n_days * frac * float(sal_in)
     
-    ni = 0.12 * (sal - 797) - 0.1 * max([0, sal - 4190.33])
+    ni = max([0, 0.12 * (sal - 797) - 0.1 * max([0, sal - 4190.33])])
 
     return "£{:.2f}".format(ni)
 
