@@ -1,7 +1,7 @@
 
 from dash import Dash, html, dcc, Input, Output
 import dash_bootstrap_components as dbc
-
+import plotly.express as px
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.GRID])
 server = app.server
@@ -194,7 +194,20 @@ app.layout = html.Div([
         ]
     ),
     
-    html.Br(),html.Br(),html.Br(),
+    html.Br(),html.Br(),
+    
+    dbc.Row([
+        dbc.Col([
+            html.H4('Normal month'), 
+            dcc.Graph(id="pay_pie")], 
+        width=4),
+        dbc.Col([
+            html.H4('Month with strike deductions'),
+            dcc.Graph(id="pay_pie_deduct")],
+        width=4),
+    ]),
+    
+    html.Br(),html.Br(),
     dbc.Row(html.Div("Notes:")), html.Br(),
     dbc.Row(
         html.Div(children=[
@@ -211,18 +224,79 @@ app.layout = html.Div([
         html.A("j.m.rafferty@swansea.ac.uk", href="mailto:j.m.rafferty@swansea.ac.uk"),
         ],
         style={'fontSize': 12}
-        )
+        )   
     ),
     
     
 ])
 
 @app.callback(
+    Output("pay_pie", "figure"), 
+    Input(component_id='mnthly_take_home', component_property='children'),
+    Input(component_id='USS', component_property='value'),
+    Input(component_id='mnthly_tax', component_property='children'),
+    Input(component_id='mnthly_NI', component_property='children'),
+    Input(component_id='annual_salary', component_property='value'),
+    Input(component_id='USS', component_property='value')
+)
+def generate_chart(pay_in, USS_in, tax_in, ni_in, annual_pay_in, uss_in):
+    
+    pay = float(pay_in.replace("£", ""))
+    tax = float(tax_in.replace("£", ""))
+    ni = float(ni_in.replace("£", ""))
+    uss = float(uss_in)
+    if annual_pay_in is None:
+        annual_pay = 0
+    else:
+        annual_pay = float(annual_pay_in)
+    
+    df = {
+        "Labels": ["Take home pay", "USS", "Tax", "NI"],
+        "Values": [pay, uss / 100 * annual_pay / 12, tax, ni],
+    }
+    
+    fig = px.pie(df, values="Values", names="Labels")
+    return fig
+    
+@app.callback(
+    Output("pay_pie_deduct", "figure"), 
+    Input(component_id='deduct_mnthly_slry', component_property='children'),
+    Input(component_id='USS', component_property='value'),
+    Input(component_id='deduct_mnthly_tax', component_property='children'),
+    Input(component_id='deduct_mnthly_NI', component_property='children'),
+    Input(component_id='annual_salary', component_property='value'),
+    Input(component_id='USS', component_property='value')
+)
+def generate_chart(pay_in, USS_in, tax_in, ni_in, annual_pay_in, uss_in):
+    
+    pay = float(pay_in.replace("£", ""))
+    tax = float(tax_in.replace("£", ""))
+    ni = float(ni_in.replace("£", ""))
+    uss = float(uss_in)
+    if annual_pay_in is None:
+        annual_pay = 0
+    else:    
+        annual_pay = float(annual_pay_in)
+    
+    df = {
+        "Labels": ["Take home pay", "USS", "Tax", "NI"],
+        "Values": [pay, uss / 100 * annual_pay / 12, tax, ni],
+    }
+    
+    fig = px.pie(df, values="Values", names="Labels")
+    return fig
+
+@app.callback(
     Output(component_id='mnthly_slry', component_property='children'),
     Input(component_id='annual_salary', component_property='value')
 )
 def pretax_mnthly_slry(sal_in):
-    return "£{:.2f}".format(float(sal_in)/12)
+
+    if sal_in is None:
+        sal = 0
+    else:
+        sal = float(sal_in)/12
+    return "£{:.2f}".format(sal)
 
 
 @app.callback(
@@ -236,7 +310,12 @@ def deduct_pretax_mnthly_slry(sal_in, frac_in, n_strike_days):
         frac = 1/365
     elif frac_in == "1/260":
         frac = 1/260
-    return "£{:.2f}".format((float(sal_in))/12 - frac * float(n_strike_days) * float(sal_in))
+        
+    if sal_in is None:
+        sal = 0
+    else:
+        sal = float(sal_in)/12
+    return "£{:.2f}".format(sal - 12 * frac * float(n_strike_days) * sal)
     
 @app.callback(
     Output(component_id='forgone_mnthly_slry', component_property='children'),
@@ -249,7 +328,12 @@ def forgone_mnthly_slry(sal_in, frac_in, n_strike_days):
         frac = 1/365
     elif frac_in == "1/260":
         frac = 1/260
-    return "£{:.2f}".format((frac * float(n_strike_days) * float(sal_in)))    
+
+    if sal_in is None:
+        sal = 0
+    else:
+        sal = float(sal_in)        
+    return "£{:.2f}".format((frac * float(n_strike_days) * sal))    
 
 
 @app.callback(
@@ -261,7 +345,12 @@ def forgone_mnthly_slry(sal_in, frac_in, n_strike_days):
 def mnthly_tax(sal_in, uss_in, tax_free_in):
 
     uss = 1 - float(uss_in) / 100
-    sal = uss * float(sal_in)/12
+    
+    if sal_in is None:
+        sal = 0
+    else:
+        sal = uss * float(sal_in)/12
+    
     tax_free = float(tax_free_in)/12
     
     tax = max([0, 0.2 * (sal - tax_free) + 0.2 * max([0, sal - 4189.25])])
@@ -285,8 +374,11 @@ def mnthly_tax_deduct(sal_in, uss_in, tax_free_in, frac_in, n_days_in):
         frac = 1/260
     n_days = float(n_days_in)
     uss = 1 - float(uss_in) / 100
-    
-    sal = uss * float(sal_in)/12 - float(sal_in) * n_days * frac 
+
+    if sal_in is None:
+        sal = 0
+    else:    
+        sal = uss * float(sal_in)/12 - float(sal_in) * n_days * frac 
     tax_free = float(tax_free_in)/12
     
     
@@ -312,8 +404,12 @@ def mnthly_tax_forgone(sal_in, uss_in, tax_free_in, frac_in, n_days_in):
     n_days = float(n_days_in)
     uss = 1 - float(uss_in) / 100
     
-    sal_orig = uss * float(sal_in)/12 
-    sal = uss * float(sal_in)/12 - float(sal_in) * n_days * frac 
+    if sal_in is None:
+        sal = 0
+        sal_orig = 0
+    else:
+        sal_orig = uss * float(sal_in)/12 
+        sal = uss * float(sal_in)/12 - float(sal_in) * n_days * frac 
     tax_free = float(tax_free_in)/12
     
     
@@ -330,7 +426,10 @@ def mnthly_tax_forgone(sal_in, uss_in, tax_free_in, frac_in, n_days_in):
 )
 def mnthly_ni(sal_in):
 
-    sal = float(sal_in)/12
+    if sal_in is None:
+        sal = 0
+    else:
+        sal = float(sal_in)/12
     
     ni = max([0, 0.12 * (sal - 797) - 0.1 * max([0, sal - 4190.33])])
 
@@ -351,7 +450,11 @@ def mnthly_ni_deduct(sal_in, frac_in, n_days_in):
     elif frac_in == "1/260":
         frac = 1/260
     n_days = float(n_days_in)
-    sal = float(sal_in)/12 - n_days * frac * float(sal_in)
+    
+    if sal_in is None:
+        sal = 0
+    else:
+        sal = float(sal_in)/12 - n_days * frac * float(sal_in)
     
     ni = max([0, 0.12 * (sal - 797) - 0.1 * max([0, sal - 4190.33])])
 
@@ -401,7 +504,11 @@ def deduct_mnthly_take_home(sal_in, sal_orig_in, uss_in, tax_in, ni_in):
 
     uss = float(uss_in) / 100
     sal = float(sal_in.replace('£', ''))
-    sal_orig = float(sal_orig_in)/12 
+    
+    if sal_orig_in is None:
+        sal_orig = 0
+    else:    
+        sal_orig = float(sal_orig_in)/12 
     tax = float(tax_in.replace('£', ''))
     ni = float(ni_in.replace('£', ''))
 
