@@ -13,33 +13,45 @@ app.layout = html.Div([
     dbc.Row(
         [
             dbc.Col(
-                html.Div('Annual salary before deductions'),
+                html.Div('Annual salary before deductions (£)'),
                 width=2
             ),
             dbc.Col(
-                html.Div(dcc.Input(id="annual_salary", value='30497', type='number'))
+                html.Div(dcc.Input(id="annual_salary", value='30497', type='number')),
+                width=2
+            ),
+            dbc.Col(
+                html.Div('Enter your annual, pre-tax salary here')
             ),
         ]
     ),
     dbc.Row(
         [
             dbc.Col(
-                html.Div('USS'),
+                html.Div('USS (%)'),
                 width=2
             ),
             dbc.Col(
-                html.Div(dcc.Input(id="USS", value='9.8', type='number'))
+                html.Div(dcc.Input(id="USS", value='9.8', type='number')),
+                width=2
+            ),
+            dbc.Col(
+                html.Div('If you are not a member of USS, set this to zero')
             ),
         ]
     ),
     dbc.Row(
         [
             dbc.Col(
-                html.Div('Tax free allowance'),
+                html.Div('Tax free allowance (£)'),
                 width=2
             ),
             dbc.Col(
                 html.Div(dcc.Input(id="annual_tax_free", value='12570', type='number')),
+                width=2
+            ),
+            dbc.Col(
+                html.Div('This information comes from your tax code, which is on your payslip')
             ),
         ]
     ),
@@ -179,7 +191,27 @@ app.layout = html.Div([
                 width=2
             )
         ]
-    )
+    ),
+    
+    html.Br(),html.Br(),html.Br(),
+    dbc.Row(html.Div("Notes:")), html.Br(),
+    dbc.Row(
+        html.Div(children=[
+        """This is only an estimate of take home pay, and personal financial arrangements will 
+        affect the pay you receive following deductions. 
+        The additional rate of tax, above £150,000 per year, is not included in this calculation.
+        Other deductions like car parking, student loan etc are also not included.
+        Source code is available to view 
+        """
+        , html.A("here.", href="https://github.com/jim-rafferty/strike_take_home_pay_calculator"),
+        """
+        If you have any improvements to this tool, please send me a pull request on github and I will
+        be happy to incorporate them. Please send questions and comments to""",
+        html.A("j.m.rafferty@swansea.ac.uk", href="mailto:j.m.rafferty@swansea.ac.uk"),
+        ],
+        style={'fontSize': 12}
+        )
+    ),
     
     
 ])
