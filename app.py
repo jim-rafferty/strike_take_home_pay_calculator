@@ -239,7 +239,7 @@ app.layout = html.Div([
     Input(component_id='annual_salary', component_property='value'),
     Input(component_id='USS', component_property='value')
 )
-def generate_chart(pay_in, USS_in, tax_in, ni_in, annual_pay_in, uss_in):
+def generate_chart_noStrike(pay_in, USS_in, tax_in, ni_in, annual_pay_in, uss_in):
     
     pay = float(pay_in.replace("£", ""))
     tax = float(tax_in.replace("£", ""))
@@ -267,7 +267,7 @@ def generate_chart(pay_in, USS_in, tax_in, ni_in, annual_pay_in, uss_in):
     Input(component_id='annual_salary', component_property='value'),
     Input(component_id='USS', component_property='value')
 )
-def generate_chart(pay_in, USS_in, tax_in, ni_in, annual_pay_in, uss_in):
+def generate_chart_strike(pay_in, USS_in, tax_in, ni_in, annual_pay_in, uss_in):
     
     pay = float(pay_in.replace("£", ""))
     tax = float(tax_in.replace("£", ""))
@@ -353,7 +353,7 @@ def mnthly_tax(sal_in, uss_in, tax_free_in):
     
     tax_free = float(tax_free_in)/12
     
-    tax = max([0, 0.2 * (sal - tax_free) + 0.2 * max([0, sal - 4189.25])])
+    tax = max([0, 0.2 * (sal - tax_free) + 0.2 * max([0, sal - 3141.75])]) # 2021: 4189.25
 
     return "£{:.2f}".format(tax)
 
@@ -382,7 +382,7 @@ def mnthly_tax_deduct(sal_in, uss_in, tax_free_in, frac_in, n_days_in):
     tax_free = float(tax_free_in)/12
     
     
-    tax = max([0, 0.2 * (sal - tax_free) + 0.2 * max([0, sal - 4189.25])])
+    tax = max([0, 0.2 * (sal - tax_free) + 0.2 * max([0, sal - 3141.75])]) # 2021: 4189.25
 
     return "£{:.2f}".format(tax)
 
@@ -413,8 +413,8 @@ def mnthly_tax_forgone(sal_in, uss_in, tax_free_in, frac_in, n_days_in):
     tax_free = float(tax_free_in)/12
     
     
-    tax = ( max([0, 0.2 * (sal - tax_free) + 0.2 * max([0, sal - 4189.25])]) - 
-        max([0, 0.2 * (sal_orig - tax_free) + 0.2 * max([0, sal_orig - 4189.25])])
+    tax = ( max([0, 0.2 * (sal - tax_free) + 0.2 * max([0, sal - 3141.75])]) - 
+        max([0, 0.2 * (sal_orig - tax_free) + 0.2 * max([0, sal_orig - 3141.75])])
     )
 
     return "£{:.2f}".format(tax)
@@ -431,8 +431,9 @@ def mnthly_ni(sal_in):
     else:
         sal = float(sal_in)/12
     
-    ni = max([0, 0.12 * (sal - 797) - 0.1 * max([0, sal - 4190.33])])
-
+    ni = max([0, 0.1325 * (sal - 823) - 0.1 * max([0, sal - 4189])])
+    # 2021 : primary threshold: 797, upper earnings limit: 4190.33
+    # 2021 : Rates 12%, 2%
     return "£{:.2f}".format(ni)
 
 
@@ -456,7 +457,7 @@ def mnthly_ni_deduct(sal_in, frac_in, n_days_in):
     else:
         sal = float(sal_in)/12 - n_days * frac * float(sal_in)
     
-    ni = max([0, 0.12 * (sal - 797) - 0.1 * max([0, sal - 4190.33])])
+    ni = max([0, 0.1325 * (sal - 823) - 0.1 * max([0, sal - 4189])])
 
     return "£{:.2f}".format(ni)
 
