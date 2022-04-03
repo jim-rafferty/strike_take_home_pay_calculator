@@ -214,6 +214,7 @@ app.layout = html.Div([
         """This is only an estimate of take home pay, and personal financial arrangements will 
         affect the pay you receive following deductions. 
         The additional rate of tax, above £150,000 per year, is not included in this calculation.
+        Note that tax rates in Scotland are different to rates in other UK nations.
         Other deductions like car parking, student loan etc are also not included.
         Source code is available to view 
         """
